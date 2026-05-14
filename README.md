@@ -4,6 +4,79 @@ Portal de governança e validação fiscal (Procure-to-Pay) — React, Vite e Ta
 
 ## Rodar localmente
 
+### Passo a passo (Windows)
+
+1. **Instale o Node.js (obrigatório)**  
+   - Baixe a versão **LTS** em [https://nodejs.org/](https://nodejs.org/).  
+   - Instale com as opções padrão (isso coloca `node` e `npm` no PATH).  
+   - **Feche todos os terminais** (PowerShell, CMD, Cursor) e abra de novo.
+
+2. **Confirme que o Windows enxerga o npm**
+
+```powershell
+node -v
+npm -v
+```
+
+Se aparecer *“npm não é reconhecido”*, o Node não está no PATH: reinstale o Node ou reinicie o PC; às vezes o PATH só atualiza após novo login.
+
+3. **Entre na pasta do projeto** (tem que existir o arquivo `package.json` aí dentro):
+
+```powershell
+cd C:\Users\lucas.soares\govfiscal
+dir package.json
+```
+
+Se `dir package.json` der erro, você está na pasta errada — abra a pasta certa no Explorer e use *“Copiar como caminho”* no endereço.
+
+4. **Instale as dependências** (só na primeira vez, ou depois de clonar de novo):
+
+```powershell
+npm install
+```
+
+Espere terminar sem erro. Se falhar por rede/proxy, tente de outra rede ou `npm install` de novo.
+
+5. **Suba o servidor de desenvolvimento**:
+
+```powershell
+npm run dev
+```
+
+Deixe essa janela **aberta**. O terminal vai mostrar algo como:
+
+`Local: http://localhost:5173/`
+
+6. **Abra o navegador** nesse endereço e vá para a tela de acesso:
+
+`http://localhost:5173/acesso`
+
+---
+
+### Se o navegador der “não foi possível conectar” / `ERR_CONNECTION_REFUSED`
+
+- O servidor **não está rodando**: o passo `npm run dev` precisa estar ativo no terminal.  
+- A porta pode ser **5174** se a 5173 estiver ocupada — use **exatamente** a URL que o Vite imprimir.
+
+### Rodar pelo Cursor / VS Code
+
+- **Terminal → New Terminal** na raiz da pasta `govfiscal` (onde está o `package.json`).  
+- Rode `npm install` uma vez e depois `npm run dev`.  
+- Clique no link `http://localhost:5173` se o terminal mostrar como link.
+
+### Erro ao abrir a página (tela branca ou erro no console)
+
+- Apague a pasta `node_modules` e o arquivo `package-lock.json` (se existir), depois rode de novo:
+
+```powershell
+npm install
+npm run dev
+```
+
+---
+
+Comandos resumidos (depois do Node instalado e na pasta certa):
+
 ```bash
 npm install
 npm run dev
