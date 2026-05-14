@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Disputa",
+  "type": "object",
+  "properties": {
+    "nota_fiscal_id": { "type": "string" },
+    "numero_nota": { "type": "string" },
+    "fornecedor_nome": { "type": "string" },
+    "autor": { "type": "string" },
+    "papel": { "type": "string", "enum": ["fornecedor", "gestor"] },
+    "mensagem": { "type": "string" },
+    "arquivo_url": { "type": "string" },
+    "arquivo_nome": { "type": "string" }
+  },
+  "required": ["nota_fiscal_id", "autor", "papel", "mensagem"]
+}

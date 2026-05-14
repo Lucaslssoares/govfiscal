@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fornecedor",
+  "type": "object",
+  "properties": {
+    "razao_social": { "type": "string" },
+    "cnpj": { "type": "string" },
+    "email": { "type": "string" },
+    "telefone": { "type": "string" },
+    "endereco": { "type": "string" },
+    "responsavel": { "type": "string" },
+    "status": { "type": "string", "enum": ["ativo", "inativo", "suspenso"] }
+  },
+  "required": ["razao_social", "cnpj"]
+}

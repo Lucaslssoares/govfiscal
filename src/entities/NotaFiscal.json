@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NotaFiscal",
+  "type": "object",
+  "properties": {
+    "cnpj_emissor": { "type": "string" },
+    "numero_nota": { "type": "string" },
+    "numero_contrato": { "type": "string" },
+    "valor_bruto": { "type": "number" },
+    "items_json": { "type": "string" },
+    "arquivo_url": { "type": "string" },
+    "arquivo_nome": { "type": "string" },
+    "status": { "type": "string", "enum": ["pendente", "aprovada", "rejeitada"] },
+    "motivo_rejeicao": { "type": "string" },
+    "fornecedor_nome": { "type": "string" },
+    "email_fornecedor": { "type": "string" },
+    "protocolo": { "type": "string" },
+    "tipo_servico": { "type": "string" }
+  },
+  "required": ["cnpj_emissor", "numero_nota", "numero_contrato"]
+}

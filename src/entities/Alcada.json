@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Alcada",
+  "type": "object",
+  "properties": {
+    "nivel": { "type": "string" },
+    "valor_min": { "type": "number" },
+    "valor_max": { "type": "number" },
+    "responsavel": { "type": "string" },
+    "email_responsavel": { "type": "string" },
+    "ativo": { "type": "boolean" }
+  },
+  "required": ["nivel", "valor_min", "responsavel"]
+}
