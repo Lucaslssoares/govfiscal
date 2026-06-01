@@ -253,6 +253,11 @@ govfiscal/
 │   │   └── api/
 │   │       └── mockWebhook.js      # Motor de Two-Way Matching: valida CNPJ, itens, quantidades e saldo
 │   │
+│   ├── components/
+│   │   └── auth/
+│   │       └── authSimulator.js    # Exporta apenas ROLES — metadados de exibição (cores e labels) por role
+│   │                               # A sessão real é gerenciada pelo Supabase Auth (AuthContext.jsx)
+│   │
 │   ├── components/ui/              # Componentes shadcn/ui (Badge, Button, Card, Dialog, Input, Label, Table, Textarea)
 │   │                               # Não edite esses arquivos — são a biblioteca de UI base do projeto
 │   │
@@ -389,26 +394,44 @@ As entidades disponíveis são: `Fornecedor`, `Contrato`, `NotaFiscal`, `Alcada`
 
 ## Roles e permissões
 
-| Role | Telas acessíveis |
-|---|---|
-| `admin` | Tudo (dashboard, fornecedores, contratos, alçadas, fechamento, disputas, usuários) |
-| `gestor` | Dashboard, fornecedores, contratos, alçadas, fechamento, disputas |
-| `analista` | Central de disputas |
-| `fornecedor` | Portal do fornecedor (isolado por CNPJ) + disputas |
+| Role | E-mail demo | Telas acessíveis |
+|---|---|---|
+| `admin` | `ana@empresa.com` | Tudo (dashboard, fornecedores, contratos, alçadas, fechamento, disputas, usuários) |
+| `gestor` | `carlos@empresa.com` | Dashboard, fornecedores, contratos, alçadas, fechamento, disputas |
+| `analista` | `mariana@empresa.com` | Central de disputas |
+| `fornecedor` | `contato@empresaalfa.com.br` | Portal do fornecedor (isolado por CNPJ) + disputas |
 
-As rotas protegidas ficam em `src/App.jsx`. O `AuthContext` distribui `role` e `user` para qualquer componente via `useAuth()`.
+**Senha de todos os usuários demo:** `GovFiscal@2025`
+
+As rotas protegidas ficam em `src/App.jsx` via `RequireRole`. O `AuthContext` distribui `role`, `user` e `loading` para qualquer componente via `useAuth()`.
 
 ```js
 // Exemplo de uso dentro de um componente
 import { useAuth } from "@/lib/AuthContext.jsx";
 
 function MeuComponente() {
-  const { role, user } = useAuth();
+  const { role, user, loading } = useAuth();
 
+  if (loading) return <p>Carregando…</p>;
   if (role !== "admin") return <p>Acesso negado</p>;
   return <p>Olá, {user.nome}</p>;
 }
 ```
+
+### O que `user` contém após login
+
+```js
+{
+  id:       "usr_seed_001",
+  nome:     "Ana Souza",
+  email:    "ana@empresa.com",
+  role:     "admin",
+  status:   "ativo",
+  cnpj:     null,           // preenchido apenas para role "fornecedor"
+}
+```
+
+Para o role `fornecedor`, `user.cnpj` contém o CNPJ da empresa (ex: `"12345678000190"`). As páginas de Portal e Disputas usam `user.cnpj` para filtrar os dados.
 
 ---
 
@@ -541,8 +564,24 @@ npm run dev
 **Erro: `VITE_SUPABASE_URL não definida` ou `supabaseClient` falhou**
 → O arquivo `.env` não existe ou está vazio. Repita o passo 3 da configuração.
 
+**Login retorna "E-mail ou senha inválidos"**
+→ Verifique se está usando exatamente `GovFiscal@2025` como senha (com G maiúsculo e @ no meio). Se o problema persistir, peça ao Lucas para verificar se o usuário existe no Supabase Auth.
+
+**Login aceita mas a tela fica em branco / não redireciona**
+→ O usuário existe no Supabase Auth mas não tem registro correspondente na tabela `app_user`. Insira o registro:
+```sql
+INSERT INTO app_user (id, nome, email, role, status)
+VALUES ('usr_xxx', 'Seu Nome', 'seu@email.com', 'gestor', 'ativo');
+```
+
+**Sessão some ao recarregar a página**
+→ O `.env` pode estar incompleto — `VITE_SUPABASE_ANON_KEY` é necessária para o SDK manter a sessão.
+
 **Dados não aparecem na tela**
-→ Supabase com RLS ativado bloqueia leituras. Peça ao dono do projeto para verificar as permissões das tabelas.
+→ Supabase com RLS ativado bloqueia leituras com a anon key. O dono do projeto precisa rodar no SQL Editor:
+```sql
+ALTER TABLE <nome_da_tabela> DISABLE ROW LEVEL SECURITY;
+```
 
 **Porta 5173 ocupada**
 → O Vite sobe automaticamente na porta seguinte (5174, 5175…). Use a URL que aparecer no terminal.
