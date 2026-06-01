@@ -77,11 +77,11 @@ O banco de dados é compartilhado no **Supabase** (nuvem). As chaves ficam em `.
 copy .env.example .env
 ```
 
-Abra o `.env` criado e preencha:
+Abra o `.env` criado e preencha com os valores que o **Lucas vai te passar pelo grupo**:
 
 ```env
-VITE_SUPABASE_URL=https://twrfkyqimzhbosgfvuyu.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_CkH5ZHaRRKLDZwBIcX84wQ_UPV-uhql
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
 ```
 
 > **Nunca suba o `.env` para o GitHub.** Ele já está no `.gitignore` — o Git vai ignorá-lo automaticamente.
