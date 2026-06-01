@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, ClipboardList, Scale, MessageSquare, LogOut, Building2, UserCog } from "lucide-react";
+import { LayoutDashboard, FileText, ClipboardList, Scale, MessageSquare, LogOut, Building2, UserCog, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext.jsx";
 import { ROLES } from "@/components/auth/authSimulator";
@@ -18,13 +18,19 @@ export default function AppLayout({ children }) {
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-3">
-            <Link to="/" className="text-lg font-bold tracking-tight text-foreground">
+            <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+              <ShieldCheck className="h-5 w-5 text-primary" />
               Gov<span className="text-primary">Fiscal</span>
             </Link>
             <span className={cn("hidden rounded-md border px-2 py-1 text-xs sm:inline-flex", meta.color)}>{meta.label}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="hidden md:inline">{user?.nome || user?.razao_social || "—"}</span>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className="hidden md:flex items-center gap-2">
+              <div className={cn("h-7 w-7 rounded-full border flex items-center justify-center text-xs font-bold", meta.color)}>
+                {(user?.nome || user?.razao_social || "?").charAt(0).toUpperCase()}
+              </div>
+              <span>{user?.nome || user?.razao_social || "—"}</span>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -85,7 +91,7 @@ export default function AppLayout({ children }) {
               </NavLink>
             )}
           </nav>
-          <p className="mt-6 text-xs text-muted-foreground">Demo acadêmica — dados em localStorage.</p>
+          <p className="mt-6 text-xs text-muted-foreground">GovFiscal · v1.0 · 2025</p>
         </aside>
         <main className="min-w-0 flex-1">{children}</main>
       </div>

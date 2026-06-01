@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import AppLayout from "@/components/layout/AppLayout.jsx";
 import { formatCnpj, onlyDigits } from "@/lib/utils";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export default function CadastroFornecedores() {
   const qc = useQueryClient();
@@ -32,9 +33,11 @@ export default function CadastroFornecedores() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fornecedores"] });
+      toast.success(editing ? "Fornecedor atualizado." : "Fornecedor cadastrado.");
       setEditing(null);
       setForm({ razao_social: "", cnpj: "", email: "", telefone: "", endereco: "", responsavel: "", status: "ativo" });
     },
+    onError: (err) => toast.error(err.message),
   });
 
   return (
@@ -136,7 +139,16 @@ export default function CadastroFornecedores() {
                       >
                         Editar
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => base44.entities.Fornecedor.delete(r.id).then(() => qc.invalidateQueries({ queryKey: ["fornecedores"] }))}>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() =>
+                          base44.entities.Fornecedor.delete(r.id).then(() => {
+                            qc.invalidateQueries({ queryKey: ["fornecedores"] });
+                            toast.success("Fornecedor removido.");
+                          })
+                        }
+                      >
                         Excluir
                       </Button>
                     </TableCell>
