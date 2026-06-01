@@ -1,50 +1,51 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/AuthContext.jsx";
+import { supabase } from "@/lib/supabaseClient";
 import { ROLES } from "@/components/auth/authSimulator";
-import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ChevronRight, FileCheck, Users, Scale, MessageSquare } from "lucide-react";
-
-const demos = [
-  {
-    role: "admin",
-    title: "Administrador",
-    desc: "Acesso total, inclusive gestão de usuários.",
-    user: { nome: "Ana Souza", email: "ana@empresa.com" },
-    dest: "/dashboard",
-  },
-  {
-    role: "gestor",
-    title: "Gestor Financeiro",
-    desc: "Dashboard, cadastros, alçadas, fechamento e disputas.",
-    user: { nome: "Carlos Mendes", email: "carlos@empresa.com" },
-    dest: "/dashboard",
-  },
-  {
-    role: "analista",
-    title: "Analista Financeiro",
-    desc: "Acompanhamento e central de disputas.",
-    user: { nome: "Mariana Costa", email: "mariana@empresa.com" },
-    dest: "/disputas",
-  },
-  {
-    role: "fornecedor",
-    title: "Fornecedor",
-    desc: "Portal isolado por CNPJ para envio de notas.",
-    user: { nome: "Empresa Alfa Ltda", razao_social: "Empresa Alfa Ltda", email: "contato@empresaalfa.com.br", cnpj: "12345678000190" },
-    dest: "/fornecedor",
-  },
-];
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ShieldCheck, FileCheck, Scale, MessageSquare, Users, Loader2, Eye, EyeOff } from "lucide-react";
 
 const features = [
-  { icon: FileCheck, text: "Validação automática Two-Way Matching" },
-  { icon: Scale, text: "Workflow de aprovação por alçadas" },
-  { icon: MessageSquare, text: "Central de disputas em tempo real" },
-  { icon: Users, text: "Gestão de usuários e permissões" },
+  { icon: FileCheck,    text: "Validação automática Two-Way Matching" },
+  { icon: Scale,        text: "Workflow de aprovação por alçadas" },
+  { icon: MessageSquare,text: "Central de disputas em tempo real" },
+  { icon: Users,        text: "Gestão de usuários e permissões" },
+];
+
+const DEMO_HINTS = [
+  { email: "ana@empresa.com",             role: "admin" },
+  { email: "carlos@empresa.com",          role: "gestor" },
+  { email: "mariana@empresa.com",         role: "analista" },
+  { email: "contato@empresaalfa.com.br",  role: "fornecedor" },
 ];
 
 export default function Acesso() {
-  const { setSession } = useAuth();
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd,  setShowPwd]  = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
+      setError("E-mail ou senha inválidos.");
+      setLoading(false);
+    }
+    // Sucesso: onAuthStateChange no AuthContext cuida do redirect via HomeRedirect
+  }
+
+  function fillDemo(demoEmail) {
+    setEmail(demoEmail);
+    setPassword("GovFiscal@2025");
+    setError("");
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -54,17 +55,13 @@ export default function Acesso() {
           <ShieldCheck className="h-8 w-8" />
           <span className="text-2xl font-bold tracking-tight">GovFiscal</span>
         </div>
-
         <div className="space-y-6">
           <div>
-            <h1 className="text-4xl font-bold leading-tight">
-              Governança e Validação Fiscal
-            </h1>
+            <h1 className="text-4xl font-bold leading-tight">Governança e Validação Fiscal</h1>
             <p className="mt-3 text-primary-foreground/75 text-lg leading-relaxed">
               Plataforma Procure-to-Pay para controle completo do ciclo de notas fiscais, contratos e aprovações.
             </p>
           </div>
-
           <div className="space-y-3 pt-2">
             {features.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 text-primary-foreground/90">
@@ -76,72 +73,88 @@ export default function Acesso() {
             ))}
           </div>
         </div>
-
-        <p className="text-primary-foreground/40 text-xs">
-          © 2025 GovFiscal · Projeto Acadêmico
-        </p>
+        <p className="text-primary-foreground/40 text-xs">© 2025 GovFiscal · Projeto Acadêmico</p>
       </div>
 
       {/* Painel direito — login */}
       <div className="flex-1 flex flex-col justify-center bg-background px-8 py-12 lg:px-16">
-        <div className="mx-auto w-full max-w-md">
-          {/* Logo mobile */}
+        <div className="mx-auto w-full max-w-sm">
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <ShieldCheck className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">GovFiscal</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold tracking-tight">Acesso ao sistema</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Selecione seu perfil de acesso para continuar
-            </p>
+            <h2 className="text-2xl font-bold tracking-tight">Entrar</h2>
+            <p className="text-muted-foreground mt-1 text-sm">Use suas credenciais corporativas</p>
           </div>
 
-          <div className="space-y-3">
-            {demos.map((d) => {
-              const meta = ROLES[d.role];
-              const initials = (d.user.nome || d.user.razao_social || "?")
-                .split(" ")
-                .slice(0, 2)
-                .map((w) => w[0])
-                .join("")
-                .toUpperCase();
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
 
-              return (
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPwd ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="pr-10"
+                />
                 <button
-                  key={d.role}
-                  className="w-full text-left rounded-xl border-2 border-border bg-card hover:border-primary hover:shadow-sm transition-all duration-150 p-4 flex items-center justify-between group"
-                  onClick={() => {
-                    setSession(d.role, d.user);
-                    navigate(d.dest);
-                  }}
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPwd((v) => !v)}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0 ${meta.color}`}>
-                      {initials}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">
-                          {d.user.nome || d.user.razao_social}
-                        </span>
-                        <Badge variant="outline" className={`text-xs px-1.5 py-0 ${meta.color}`}>
-                          {meta.label}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{d.desc}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
-              );
-            })}
-          </div>
+              </div>
+            </div>
 
-          <p className="mt-8 text-center text-xs text-muted-foreground">
-            Ambiente de demonstração · Dados fictícios para fins acadêmicos
-          </p>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? "Entrando…" : "Entrar"}
+            </Button>
+          </form>
+
+          {/* Acesso rápido demo */}
+          <div className="mt-8 border-t pt-6">
+            <p className="text-xs text-muted-foreground mb-3 text-center">Acesso rápido (demo)</p>
+            <div className="grid grid-cols-2 gap-2">
+              {DEMO_HINTS.map(({ email: demoEmail, role }) => {
+                const meta = ROLES[role];
+                return (
+                  <button
+                    key={role}
+                    type="button"
+                    className={`rounded-lg border px-3 py-2 text-left text-xs transition-colors hover:bg-muted ${meta.color}`}
+                    onClick={() => fillDemo(demoEmail)}
+                  >
+                    <span className="font-medium block">{meta.label}</span>
+                    <span className="opacity-70 truncate block">{demoEmail}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">Senha: GovFiscal@2025</p>
+          </div>
         </div>
       </div>
     </div>
