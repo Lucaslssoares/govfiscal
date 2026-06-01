@@ -2,7 +2,7 @@
 
 Portal de governança e validação fiscal **(Procure-to-Pay)** desenvolvido como projeto acadêmico.
 
-**Stack:** React 18 · Vite · Tailwind CSS · shadcn/ui · Supabase · React Query
+**Stack:** React 18 · Vite · Tailwind CSS · shadcn/ui · Supabase Auth · Supabase DB · React Query
 
 ---
 
@@ -12,13 +12,14 @@ Portal de governança e validação fiscal **(Procure-to-Pay)** desenvolvido com
 2. [Pré-requisitos](#pré-requisitos)
 3. [Configuração (primeira vez)](#configuração-primeira-vez)
 4. [Como rodar](#como-rodar)
-5. [Arquitetura e fluxo de dados](#arquitetura-e-fluxo-de-dados)
-6. [Estrutura de arquivos](#estrutura-de-arquivos)
-7. [Banco de dados](#banco-de-dados)
-8. [Roles e permissões](#roles-e-permissões)
-9. [Como adicionar uma nova funcionalidade](#como-adicionar-uma-nova-funcionalidade)
-10. [Fluxo de trabalho em equipe](#fluxo-de-trabalho-em-equipe)
-11. [Solução de problemas](#solução-de-problemas)
+5. [Autenticação](#autenticação)
+6. [Arquitetura e fluxo de dados](#arquitetura-e-fluxo-de-dados)
+7. [Estrutura de arquivos](#estrutura-de-arquivos)
+8. [Banco de dados](#banco-de-dados)
+9. [Roles e permissões](#roles-e-permissões)
+10. [Como adicionar uma nova funcionalidade](#como-adicionar-uma-nova-funcionalidade)
+11. [Fluxo de trabalho em equipe](#fluxo-de-trabalho-em-equipe)
+12. [Solução de problemas](#solução-de-problemas)
 
 ---
 
@@ -107,27 +108,81 @@ npm run preview  # visualiza o build de produção localmente
 
 ---
 
+## Autenticação
+
+O projeto usa **Supabase Auth** com e-mail e senha. O fluxo é:
+
+```
+Usuário preenche e-mail + senha
+        ↓
+supabase.auth.signInWithPassword()
+        ↓
+Supabase valida e retorna JWT (token real)
+        ↓
+AuthContext busca o perfil em app_user (role, nome, cnpj)
+        ↓
+Rotas liberadas conforme o role do usuário
+```
+
+### Usuários de demonstração
+
+| E-mail | Role | Senha |
+|---|---|---|
+| `ana@empresa.com` | admin | `GovFiscal@2025` |
+| `carlos@empresa.com` | gestor | `GovFiscal@2025` |
+| `mariana@empresa.com` | analista | `GovFiscal@2025` |
+| `contato@empresaalfa.com.br` | fornecedor | `GovFiscal@2025` |
+
+> A tela de acesso tem botões de **acesso rápido** que preenchem o formulário automaticamente — basta clicar no perfil desejado e depois em **Entrar**.
+
+### Como a sessão funciona
+
+- O JWT gerado pelo Supabase fica armazenado no `localStorage` pelo SDK do Supabase (não pelo código do projeto).
+- Ao recarregar a página, o `AuthContext` chama `supabase.auth.getSession()` e restaura a sessão sem precisar logar novamente.
+- O token é renovado automaticamente pelo SDK antes de expirar (refresh token).
+- Ao clicar em **Sair**, `supabase.auth.signOut()` invalida o token no servidor.
+
+### Como o role é determinado
+
+O Supabase Auth gerencia apenas o login (JWT). O `role` da aplicação (admin, gestor, etc.) vem da tabela `app_user` no banco de dados, buscado pelo e-mail após o login:
+
+```js
+// AuthContext.jsx — simplificado
+const profile = await base44.entities.AppUser.filter({ email: supabaseUser.email })
+setRole(profile[0].role)   // "admin" | "gestor" | "analista" | "fornecedor"
+setUser(profile[0])        // { nome, email, cnpj, ... }
+```
+
+### Adicionar um novo usuário
+
+1. Crie o usuário no **Supabase → Authentication → Users → Add user**
+2. Insira um registro em `app_user` com o mesmo e-mail e o role desejado:
+
+```sql
+INSERT INTO app_user (id, nome, email, role, status)
+VALUES ('usr_novo_001', 'Nome Completo', 'email@empresa.com', 'gestor', 'ativo');
+```
+
+---
+
 ## Arquitetura e fluxo de dados
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                        Navegador                        │
-│                                                         │
-│  React (páginas + componentes)                          │
-│       ↕ React Query (cache + refetch automático)        │
-│  base44Client.js  ←→  supabaseClient.js                 │
-└──────────────────────────┬──────────────────────────────┘
-                           │ HTTPS REST
-                    ┌──────▼──────┐
-                    │  Supabase   │  (PostgreSQL na nuvem)
-                    │  (banco     │
-                    │  compartil- │
-                    │  hado)      │
-                    └─────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                          Navegador                           │
+│                                                              │
+│  React (páginas + componentes)                               │
+│       ↕ AuthContext (Supabase Auth — JWT + role do DB)       │
+│       ↕ React Query (cache + refetch automático)             │
+│  base44Client.js  ←→  supabaseClient.js                      │
+└─────────────────────────────┬────────────────────────────────┘
+                              │ HTTPS REST / Auth API
+                    ┌─────────▼──────────┐
+                    │      Supabase      │
+                    │  Auth  │  Database │  (PostgreSQL na nuvem)
+                    │  (JWT) │  (dados)  │
+                    └────────────────────┘
 ```
-
-**Como a autenticação funciona:**
-O projeto usa autenticação simulada (sem senha real). Ao clicar em um perfil na tela de acesso, o papel (`role`) e os dados do usuário ficam salvos no `localStorage` do navegador. O `AuthContext` distribui essas informações para todos os componentes.
 
 **Como os dados são buscados:**
 Toda página usa **React Query** (`useQuery`) para buscar dados do Supabase. O cache dura 10 segundos — as telas se atualizam automaticamente sem reload.
@@ -152,7 +207,9 @@ govfiscal/
 │   │
 │   ├── lib/
 │   │   ├── supabaseClient.js       # Cria e exporta a instância do Supabase (lê VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY)
-│   │   ├── AuthContext.jsx         # Context API — fornece { role, user, setSession, logout } para toda a árvore
+│   │   ├── AuthContext.jsx         # ★ AUTENTICAÇÃO — Supabase Auth + lookup de role em app_user
+│   │   │                           #   Fornece { role, user, loading, logout } para toda a árvore via Context API
+│   │   │                           #   Persiste sessão JWT automaticamente, refresh token silencioso
 │   │   ├── tributario.js           # Cálculo de retenções tributárias (ISS, INSS, IRRF, CSLL, PIS, COFINS) por tipo de serviço
 │   │   ├── utils.js                # Funções auxiliares: formatBRL, formatCnpj, onlyDigits, cn
 │   │   ├── query-client.js         # Configuração do React Query (staleTime, gcTime)
