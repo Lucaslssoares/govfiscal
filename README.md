@@ -1,135 +1,167 @@
 # GovFiscal
 
-Portal de governança e validação fiscal (Procure-to-Pay) — React, Vite e Tailwind. Dados de demonstração em `localStorage` no navegador.
+Portal de governança e validação fiscal (Procure-to-Pay) desenvolvido para a faculdade.
 
-## Rodar localmente
-
-### Passo a passo (Windows)
-
-1. **Instale o Node.js (obrigatório)**  
-   - Baixe a versão **LTS** em [https://nodejs.org/](https://nodejs.org/).  
-   - Instale com as opções padrão (isso coloca `node` e `npm` no PATH).  
-   - **Feche todos os terminais** (PowerShell, CMD, Cursor) e abra de novo.
-
-2. **Confirme que o Windows enxerga o npm**
-
-```powershell
-node -v
-npm -v
-```
-
-Se aparecer *“npm não é reconhecido”*, o Node não está no PATH: reinstale o Node ou reinicie o PC; às vezes o PATH só atualiza após novo login.
-
-3. **Entre na pasta do projeto** (tem que existir o arquivo `package.json` aí dentro):
-
-```powershell
-cd C:\Users\lucas.soares\govfiscal
-dir package.json
-```
-
-Se `dir package.json` der erro, você está na pasta errada — abra a pasta certa no Explorer e use *“Copiar como caminho”* no endereço.
-
-4. **Instale as dependências** (só na primeira vez, ou depois de clonar de novo):
-
-```powershell
-npm install
-```
-
-Espere terminar sem erro. Se falhar por rede/proxy, tente de outra rede ou `npm install` de novo.
-
-5. **Suba o servidor de desenvolvimento**:
-
-```powershell
-npm run dev
-```
-
-Deixe essa janela **aberta**. O terminal vai mostrar algo como:
-
-`Local: http://localhost:5173/`
-
-6. **Abra o navegador** nesse endereço e vá para a tela de acesso:
-
-`http://localhost:5173/acesso`
+Tecnologias: **React 18 · Vite · Tailwind CSS · Supabase (banco compartilhado)**
 
 ---
 
-### Se o navegador der “não foi possível conectar” / `ERR_CONNECTION_REFUSED`
+## Pré-requisitos
 
-- O servidor **não está rodando**: o passo `npm run dev` precisa estar ativo no terminal.  
-- A porta pode ser **5174** se a 5173 estiver ocupada — use **exatamente** a URL que o Vite imprimir.
+| Ferramenta | Versão mínima | Download |
+|---|---|---|
+| Node.js | 18 LTS | [nodejs.org](https://nodejs.org/) |
+| Git | qualquer | [git-scm.com](https://git-scm.com/download/win) |
 
-### Rodar pelo Cursor / VS Code
-
-- **Terminal → New Terminal** na raiz da pasta `govfiscal` (onde está o `package.json`).  
-- Rode `npm install` uma vez e depois `npm run dev`.  
-- Clique no link `http://localhost:5173` se o terminal mostrar como link.
-
-### Erro ao abrir a página (tela branca ou erro no console)
-
-- Apague a pasta `node_modules` e o arquivo `package-lock.json` (se existir), depois rode de novo:
-
-```powershell
-npm install
-npm run dev
-```
+> Após instalar, **feche e reabra o terminal** antes de continuar.
+> Confirme com `node -v` e `npm -v`.
 
 ---
 
-Comandos resumidos (depois do Node instalado e na pasta certa):
+## Configuração (primeira vez)
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/Lucaslssoares/govfiscal.git
+cd govfiscal
+```
+
+### 2. Instale as dependências
 
 ```bash
 npm install
+```
+
+### 3. Configure o arquivo `.env`
+
+O projeto usa o **Supabase** como banco de dados compartilhado. As chaves de acesso ficam em um arquivo `.env` que **não está no repositório** por segurança.
+
+Crie o arquivo `.env` na raiz do projeto:
+
+```bash
+# Windows (PowerShell)
+copy .env.example .env
+```
+
+Depois abra o `.env` e preencha com as chaves que o dono do projeto vai te passar:
+
+```env
+VITE_SUPABASE_URL=https://twrfkyqimzhbosgfvuyu.supabase.co
+VITE_SUPABASE_ANON_KEY=<peça a chave ao Lucas>
+```
+
+> **Nunca suba o `.env` para o GitHub** — ele já está no `.gitignore`.
+
+### 4. Rode o projeto
+
+```bash
 npm run dev
 ```
 
-Abra `http://localhost:5173/acesso`.
+Abra **http://localhost:5173/acesso** no navegador.
 
-### Pré-requisitos no Windows
+---
 
-- **Node.js** (para `npm`): [nodejs.org](https://nodejs.org/) — LTS. Depois feche e reabra o PowerShell e teste `node -v` e `npm -v`.
-- **Git** (para `git`): [git-scm.com/download/win](https://git-scm.com/download/win). Na instalação, deixe marcada a opção **“Git from the command line and also from 3rd-party software”** (PATH). Feche e reabra o PowerShell e teste `git --version`.
+## Fluxo de trabalho em equipe
 
-Se aparecer *“git não é reconhecido”*, o Git não está no PATH: reinstale com a opção acima ou adicione manualmente ao PATH do usuário, por exemplo:
-
-`C:\Program Files\Git\cmd`
-
-(Em *Configurações → Sistema → Sobre → Configurações avançadas do sistema → Variáveis de ambiente*, edite `Path` do seu usuário.)
-
-**Sem instalar Git no terminal:** use o [GitHub Desktop](https://desktop.github.com/) — *File → Add local repository* na pasta do projeto e depois *Publish repository* / sincronize com `Lucaslssoares/govfiscal`.
-
-## Repositório remoto
-
-**GitHub:** [https://github.com/Lucaslssoares/govfiscal](https://github.com/Lucaslssoares/govfiscal)
-
-### Primeiro envio (na pasta do projeto)
+### Sincronizar com o repositório
 
 ```bash
-git init
-git add -A
-git commit -m "chore: initial commit GovFiscal"
-git branch -M main
-git remote add origin https://github.com/Lucaslssoares/govfiscal.git
-git push -u origin main
-```
+# Antes de começar a trabalhar — sempre
+git pull
 
-Se o Git avisar que `origin` já existe:
-
-```bash
-git remote set-url origin https://github.com/Lucaslssoares/govfiscal.git
-git push -u origin main
-```
-
-**SSH** (se usa chave no GitHub):
-
-```bash
-git remote add origin git@github.com:Lucaslssoares/govfiscal.git
-git push -u origin main
-```
-
-### Próximos commits
-
-```bash
-git add -A
-git commit -m "sua mensagem"
+# Após terminar suas alterações
+git add .
+git commit -m "descrição do que fez"
 git push
 ```
+
+### Convenção de commits
+
+| Prefixo | Quando usar |
+|---|---|
+| `feat:` | nova funcionalidade |
+| `fix:` | correção de bug |
+| `style:` | ajuste visual / CSS |
+| `refactor:` | melhoria de código sem mudar comportamento |
+| `docs:` | alteração na documentação |
+
+Exemplo: `git commit -m "feat: adiciona filtro de status na tela de notas fiscais"`
+
+---
+
+## Estrutura do projeto
+
+```
+govfiscal/
+├── src/
+│   ├── api/
+│   │   └── base44Client.js      # Camada de acesso ao Supabase (CRUD)
+│   ├── lib/
+│   │   ├── supabaseClient.js    # Instância do cliente Supabase
+│   │   ├── AuthContext.jsx      # Contexto de autenticação e roles
+│   │   └── tributario.js        # Cálculos tributários
+│   ├── pages/                   # Telas da aplicação
+│   │   ├── Acesso.jsx           # Login
+│   │   ├── Dashboard.jsx
+│   │   ├── CadastroFornecedores.jsx
+│   │   ├── CadastroContratos.jsx
+│   │   ├── ConfigAlcadas.jsx
+│   │   ├── FechamentoLote.jsx
+│   │   ├── CentralDisputas.jsx
+│   │   ├── GestaoUsuarios.jsx
+│   │   └── Fornecedor.jsx
+│   ├── components/              # Componentes reutilizáveis
+│   └── entities/                # Schemas JSON das entidades
+├── supabase/
+│   └── migration.sql            # SQL para criar as tabelas no Supabase
+├── .env.example                 # Modelo do arquivo .env
+└── .gitignore
+```
+
+---
+
+## Banco de dados (Supabase)
+
+O banco é compartilhado entre todos do grupo — qualquer dado criado por um aparece para todos em tempo real.
+
+| Tabela | Conteúdo |
+|---|---|
+| `fornecedor` | Cadastro de fornecedores |
+| `contrato` | Contratos por fornecedor |
+| `nota_fiscal` | Notas fiscais submetidas |
+| `alcada` | Níveis de aprovação por valor |
+| `disputa` | Mensagens de disputas |
+| `app_user` | Usuários do sistema |
+
+---
+
+## Roles e acesso
+
+| Role | Acesso |
+|---|---|
+| `admin` | Tudo |
+| `gestor` | Dashboard, fornecedores, contratos, alçadas, disputas |
+| `analista` | Central de disputas |
+| `fornecedor` | Portal do fornecedor |
+
+---
+
+## Solução de problemas
+
+**`npm não é reconhecido`**
+→ Node.js não está no PATH. Reinstale e reabra o terminal.
+
+**Tela branca ou erro no console**
+```bash
+rm -rf node_modules
+npm install
+npm run dev
+```
+
+**`VITE_SUPABASE_URL não definida`**
+→ O arquivo `.env` não existe ou está mal preenchido. Revise o passo 3.
+
+**Porta 5173 ocupada**
+→ O Vite sobe automaticamente na 5174. Use a URL que aparecer no terminal.
