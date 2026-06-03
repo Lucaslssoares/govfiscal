@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "tipo": "aprovacao",
+    "mensagem": "Nota fiscal aprovada",
+    "origem": "Dashboard",
+    "lida": false,
+    "data": ""
+  },
+  {
+    "id": 2,
+    "tipo": "rejeicao",
+    "mensagem": "Nota fiscal rejeitada",
+    "origem": "Dashboard",
+    "lida": false,
+    "data": ""
+  },
+  {
+    "id": 3,
+    "tipo": "disputa",
+    "mensagem": "Nova disputa aberta",
+    "origem": "CentralDisputas",
+    "lida": false,
+    "data": ""
+  },
+  {
+    "id": 4,
+    "tipo": "contrato",
+    "mensagem": "Contrato próximo do vencimento",
+    "origem": "Contratos",
+    "lida": false,
+    "data": ""
+  },
+  {
+    "id": 5,
+    "tipo": "fornecedor",
+    "mensagem": "Novo fornecedor cadastrado",
+    "origem": "Fornecedor",
+    "lida": false,
+    "data": ""
+  },
+  {
+    "id": 6,
+    "tipo": "alerta",
+    "mensagem": "Alerta de inconsistência detectado",
+    "origem": "Sistema",
+    "lida": false,
+    "data": ""
+  }
+]
