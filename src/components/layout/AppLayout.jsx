@@ -1,9 +1,23 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, ClipboardList, Scale, MessageSquare, LogOut, Building2, UserCog, ShieldCheck } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext.jsx";
 import { ROLES } from "@/components/auth/authSimulator";
 import { cn } from "@/lib/utils";
+
+import {
+  LayoutDashboard,
+  FileText,
+  ClipboardList,
+  Scale,
+  MessageSquare,
+  LogOut,
+  Building2,
+  UserCog,
+  ShieldCheck,
+  CalendarDays,
+  CircleHelp
+} from "lucide-react";
 
 const linkClass = ({ isActive }) =>
   cn("flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors", isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted");
@@ -76,6 +90,18 @@ export default function AppLayout({ children }) {
                   <FileText className="h-4 w-4" />
                   Fechamento
                 </NavLink>
+
+
+                <NavLink to="/calendario-fiscal" className={linkClass}>
+                  <CalendarDays className="h-4 w-4" />
+                  Calendário Fiscal
+                </NavLink>
+
+                <NavLink to="/faq" className={linkClass}>
+                  <CircleHelp className="h-4 w-4" />
+                  FAQ
+                </NavLink>
+
               </>
             )}
             {["admin", "gestor", "analista", "fornecedor"].includes(role) && (

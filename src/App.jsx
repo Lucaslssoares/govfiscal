@@ -12,6 +12,9 @@ import GestaoUsuarios from "@/pages/GestaoUsuarios.jsx";
 import Fornecedor from "@/pages/Fornecedor.jsx";
 import PageNotFound from "@/lib/PageNotFound.jsx";
 
+import CalendarioFiscal from "@/pages/CalendarioFiscal.jsx";
+import FAQ from "@/pages/FAQ.jsx";
+
 function LoadingScreen() {
   return (
     <div className="flex h-screen items-center justify-center bg-background">
@@ -54,7 +57,15 @@ export default function App() {
       <Route path="/fornecedores"element={<RequireRole allow={["admin","gestor"]}><CadastroFornecedores /></RequireRole>} />
       <Route path="/contratos"   element={<RequireRole allow={["admin","gestor"]}><CadastroContratos /></RequireRole>} />
       <Route path="/alcadas"     element={<RequireRole allow={["admin","gestor"]}><ConfigAlcadas /></RequireRole>} />
-      <Route path="/fechamento"  element={<RequireRole allow={["admin","gestor"]}><FechamentoLote /></RequireRole>} />
+      <Route path="/fechamento"  element={<RequireRole allow={["admin","gestor"]}
+      ><FechamentoLote /></RequireRole>} />
+
+      <Route path="/calendario-fiscal"  element={<RequireRole allow={["admin","gestor"]}
+      ><CalendarioFiscal /></RequireRole>} />
+      <Route path="/faq"  element={<RequireRole allow={["admin","gestor","analista","fornecedor"]}><FAQ /></RequireRole>} />
+
+      
+
       <Route path="/disputas"    element={<RequireRole allow={["admin","gestor","analista","fornecedor"]}><CentralDisputas /></RequireRole>} />
       <Route path="/usuarios"    element={<RequireRole allow={["admin"]}><GestaoUsuarios /></RequireRole>} />
       <Route path="/fornecedor"  element={<RequireRole allow={["fornecedor"]}><Fornecedor /></RequireRole>} />
