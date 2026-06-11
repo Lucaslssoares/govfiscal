@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS nota_fiscal (
   cnpj_emissor     text NOT NULL,
   numero_nota      text NOT NULL,
   numero_contrato  text NOT NULL,
+  chave_acesso     text,                         -- 44 dígitos da NF-e / NFC-e
   valor_bruto      numeric,
   items_json       text,
   arquivo_url      text,
@@ -91,23 +92,64 @@ CREATE TABLE IF NOT EXISTS app_user (
   nome          text,
   email         text,
   role          text,
+  cnpj          text,      -- usado pelo portal do fornecedor para filtrar contratos e notas
+  razao_social  text,      -- exibido no cabeçalho do portal do fornecedor
   status        text DEFAULT 'ativo',
   created_date  timestamptz DEFAULT now(),
   updated_date  timestamptz DEFAULT now(),
   created_by    text
 );
 
+-- Idempotente para instâncias já existentes
+ALTER TABLE app_user ADD COLUMN IF NOT EXISTS cnpj         text;
+ALTER TABLE app_user ADD COLUMN IF NOT EXISTS razao_social text;
+
 -- ----------------------------------------------------------------------------
--- Permissões (anon key pode ler e escrever — adequado para projeto de estudo)
--- Desabilita RLS para simplificar. Em produção, habilite e configure policies.
+-- Segurança — Row Level Security (RLS)
+-- RLS habilitado em todas as tabelas.
+-- As policies abaixo permitem acesso público via anon key (adequado para
+-- protótipo/demo). Em produção, substitua pelas policies com auth.uid().
 -- ----------------------------------------------------------------------------
 
-ALTER TABLE fornecedor  DISABLE ROW LEVEL SECURITY;
-ALTER TABLE contrato    DISABLE ROW LEVEL SECURITY;
-ALTER TABLE nota_fiscal DISABLE ROW LEVEL SECURITY;
-ALTER TABLE alcada      DISABLE ROW LEVEL SECURITY;
-ALTER TABLE disputa     DISABLE ROW LEVEL SECURITY;
-ALTER TABLE app_user    DISABLE ROW LEVEL SECURITY;
+ALTER TABLE fornecedor  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contrato    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nota_fiscal ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alcada      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disputa     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_user    ENABLE ROW LEVEL SECURITY;
+
+-- Policies para acesso público (demo)
+-- DROP + CREATE garante idempotência (sem erro se executado mais de uma vez)
+DROP POLICY IF EXISTS "acesso_publico_fornecedor"  ON fornecedor;
+DROP POLICY IF EXISTS "acesso_publico_contrato"    ON contrato;
+DROP POLICY IF EXISTS "acesso_publico_nota_fiscal" ON nota_fiscal;
+DROP POLICY IF EXISTS "acesso_publico_alcada"      ON alcada;
+DROP POLICY IF EXISTS "acesso_publico_disputa"     ON disputa;
+DROP POLICY IF EXISTS "acesso_publico_app_user"    ON app_user;
+
+CREATE POLICY "acesso_publico_fornecedor"  ON fornecedor  FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "acesso_publico_contrato"    ON contrato    FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "acesso_publico_nota_fiscal" ON nota_fiscal FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "acesso_publico_alcada"      ON alcada      FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "acesso_publico_disputa"     ON disputa     FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "acesso_publico_app_user"    ON app_user    FOR ALL USING (true) WITH CHECK (true);
+
+/*
+-- Exemplo de policies para produção (substituir as acima):
+-- Somente o próprio fornecedor (pelo e-mail na sessão) pode ver suas notas:
+CREATE POLICY "fornecedor_proprias_notas" ON nota_fiscal
+  FOR SELECT USING (email_fornecedor = auth.jwt() ->> 'email');
+
+-- Apenas usuários autenticados podem aprovar/rejeitar:
+CREATE POLICY "gestor_update_notas" ON nota_fiscal
+  FOR UPDATE USING (auth.role() = 'authenticated');
+*/
+
+-- ----------------------------------------------------------------------------
+-- Coluna chave_acesso em instâncias já existentes (idempotente)
+-- ----------------------------------------------------------------------------
+
+ALTER TABLE nota_fiscal ADD COLUMN IF NOT EXISTS chave_acesso text;
 
 -- ----------------------------------------------------------------------------
 -- Dados iniciais (seed)

@@ -6,6 +6,7 @@
     "cnpj_emissor": { "type": "string" },
     "numero_nota": { "type": "string" },
     "numero_contrato": { "type": "string" },
+    "chave_acesso": { "type": "string", "description": "44 dígitos — chave de acesso NF-e / NFC-e" },
     "valor_bruto": { "type": "number" },
     "items_json": { "type": "string" },
     "arquivo_url": { "type": "string" },

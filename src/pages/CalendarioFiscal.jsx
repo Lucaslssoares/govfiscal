@@ -11,10 +11,6 @@ const eventos = {
 };
 
 export default function CalendarioFiscal() {
-  const formatDate = (date) => {
-    return date.toISOString().split("T")[0];
-  };
-
   return (
     <AppLayout>
       <h1 className="text-2xl font-bold mb-4">
